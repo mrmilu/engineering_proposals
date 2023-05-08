@@ -23,4 +23,11 @@ following flow
 
 ![authentication_flow.jpg](authentication_flow.jpg)
 
+>**Important**: Resources marked with 🔒 means that are protected and 
+> an **_Authorization: Bearer Token_** header should be sent on the request.
+> On the contrary resources marked with 🔓 are not protected, so no special
+> header is needed.
+
 - [Simple sign up](contracts/simple_sign_up.md)
+- [Simple sign in](contracts/simple_sign_in.md)
+- [Simple sign out](contracts/simple_sign_out.md)

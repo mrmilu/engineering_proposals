@@ -2,9 +2,9 @@
 
 ## Sign up [/auth/sign-up]
 
-This resource represents a basic login.
+This resource represents a basic sign up process.
 
-### Sign up [] [POST]
+### Sign up [] [POST] 🔓
 
 The password should follow the following regex:
 ```regexp
@@ -29,7 +29,7 @@ The password should follow the following regex:
   }
   ```
 
-### Sign up validation [/validate] [POST]
+### Sign up validation [/validate] [POST] 🔒
 
 User opens link from email with token. Front-end opens link and retrieves
 token from it for sign up validation.
@@ -37,17 +37,8 @@ token from it for sign up validation.
 * **Body**
   ```json
   {
-    "name": "Foo",
-    "surname": "Bar",
-    "email": "foo@mrmilu.com",
-    "password": "Secret123&"
+    "token": "validationToken"
   }
   ```
 
-+ **Response 200** (application/json)
-  Back-end sends validation email to user and response to client.
-  ```json
-  {
-    "token": "foobartoken"
-  }
-  ```
++ **Response 204**
