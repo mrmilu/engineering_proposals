@@ -31,3 +31,6 @@ following flow
 - [Simple sign up](contracts/simple_sign_up.md)
 - [Simple sign in](contracts/simple_sign_in.md)
 - [Simple sign out](contracts/simple_sign_out.md)
+- [Social auth](contracts/social_auth.md)
+- [Change password](contracts/change_password.md)
+- [Logged user](contracts/logged_user.md)
