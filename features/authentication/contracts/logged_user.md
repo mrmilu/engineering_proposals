@@ -12,5 +12,6 @@ This resource represents the retrieval of user profile for the current logged su
     "name": "Foo",
     "surname": "Bar",
     "email": "foo@mrmilu.com",
+    "validated": true
   }
   ```

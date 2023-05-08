@@ -27,8 +27,7 @@ Resource to update users password to new one.
   ```json
   {
     "token": "changepasswordtoken",
-    "password": "Secret123&",
-    "repeatPassword": "Secret123&",
+    "password": "Secret123&"
   }
   ```
 
