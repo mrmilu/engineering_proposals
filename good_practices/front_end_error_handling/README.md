@@ -26,7 +26,7 @@ For this the main task will be to define a structured error object that allows u
 
 The ideal error object should have the following structure[^1]:
 
-[^1]: Typescript will just as a prototyping language in this proposal.
+[^1]: Typescript will just be used as a prototyping language in this proposal.
 
 ```typescript
 type ErrorType = 'internal' | 'external';
@@ -97,12 +97,52 @@ class SomeDomainObject {
 }
 ```
 
-The issue comes with **uncontrolled errors**, for this we will rely on the framework implementation
-to handle errors globally or per section: in React it will be the `ErrorBoundary` component and in Flutter
+Then we we could create a centralized error handler at UI level to capture errors and
+display some sort of snackbar or error message for the user.
+
+Example of centralized UI error handler:
+
+```typescript
+interface TryActionInput<T> {
+  action: Promise<T>;
+  rethrowError: boolean;
+}
+
+// We could use this function to execute all promises in our program
+// and catch all type of errors and show a snackbar error.
+async function tryAction<T>({ action, rethrowError }: TryActionInput<T>) {
+  showGlobalLoader();
+  try {
+    await action();
+  } catch (e) {
+    if(e instanceof AppError) {
+      // this error code should have a corresponding translation to show a user frienldy message
+      uiProvider.showSnackBar(e.code); 
+    } else {
+      uiProvider.showSnackBar(ErrorCodes.GENERIC_ERROR);
+    }
+
+    if (rethrowError) throw e;
+  }
+}
+```
+
+Also, we could benefit from UI frameworks implementations to capture and display these errors
+but this methods will help us better to handle **uncontrolled errors**. With this implementations 
+we can handle errors globally or per section: in React it will be the `ErrorBoundary` component and in Flutter
 it will be the `ErrorWidgetBuilder`, `Flutter.onError` and `PlatformDispatcher.instance.onError`.
 
-It's fundamental that errors are always re thrown if for some reason needs catching them, this way
-we can guarantee that the errors bubbles up to the framework, and it can handle them.
+It's fundamental that errors are always re thrown (there might be a special scenario where this is not needed),
+so way we can guarantee that errors bubble up to be caught by the framework error handler implementation.
 
-Errors with no type will be automatically catalogued as internal errors be the framework error handling
-implementation.
+Finally, we should make sure that errors with no type are **automatically catalogued as internal errors** when implementing
+the frameworks error handler or our custom centralized implementation.
+
+### External errors
+
+This type of errors are more difficult to handle because they come from sources
+that we might not know, partially ignore or that are not correctly documented. So the main
+idea is to try to capture every possible known errors and transform them to our app error
+object. For those that fall outside our knowledge a generic error should be created to display
+a friendly message to the user and log all details to our error monitoring system to track what it's
+really happening in those specific scenarios.
