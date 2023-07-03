@@ -26,7 +26,7 @@ For this the main task will be to define a structured error object that allows u
 
 The ideal error object should have the following structure[^1]:
 
-[^1] Typescript will just be used as a prototyping language in this proposal.
+[^1]: Typescript will just be used as a prototyping language in this proposal.
 
 ```typescript
 type ErrorType = 'internal' | 'external';
