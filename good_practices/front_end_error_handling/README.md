@@ -6,7 +6,7 @@ We can divide them into two groups:
  - **External errors:** These are errors that occur outside the application, such as a server error or a network error.
  - **Internal errors:** These are errors that occur within the application, such as a validation error or a logic error.
 Errors produced inside the application as side effect of an external error are considered external errors. For example:
-a handled server error like a unsuccessful login attempt.
+a handled server error like an unsuccessful login attempt.
 
 In general internal errors are easier to handle because the frameworks we use give us
 tools to capture them and show them to the user in a friendly way.
@@ -26,7 +26,7 @@ For this the main task will be to define a structured error object that allows u
 
 The ideal error object should have the following structure[^1]:
 
-[^1]: Typescript will just be used as a prototyping language in this proposal.
+[^1] Typescript will just be used as a prototyping language in this proposal.
 
 ```typescript
 type ErrorType = 'internal' | 'external';
@@ -46,7 +46,7 @@ There are three key properties in this object:
  - **message:** It should be a string that describes the error, but **it should not be used as message to display to the user**
  - **stack:** It should be a string that contains the stack trace of the error.
 
-The `data` property is optional and it's used to pass additional information about the error
+The `data` property is optional, and it's used to pass additional information about the error
 that it could help different use cases for handling it.
 
 ### Error codes
@@ -97,7 +97,7 @@ class SomeDomainObject {
 }
 ```
 
-Then we we could create a centralized error handler at UI level to capture errors and
+Then we could create a centralized error handler at UI level to capture errors and
 display some sort of snackbar or error message for the user.
 
 Example of centralized UI error handler:
@@ -128,7 +128,7 @@ async function tryAction<T>({ action, rethrowError }: TryActionInput<T>) {
 ```
 
 Also, we could benefit from UI frameworks implementations to capture and display these errors
-but this methods will help us better to handle **uncontrolled errors**. With this implementations 
+but this methods will help us better to handle **uncontrolled errors**. With these implementations 
 we can handle errors globally or per section: in React it will be the `ErrorBoundary` component and in Flutter
 it will be the `ErrorWidgetBuilder`, `Flutter.onError` and `PlatformDispatcher.instance.onError`.
 
