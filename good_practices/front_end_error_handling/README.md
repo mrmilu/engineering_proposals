@@ -31,11 +31,11 @@ The ideal error object should have the following structure[^1]:
 ```typescript
 type ErrorType = 'internal' | 'external';
 
-interface AppError {
+interface AppError<T = any> {
   code: ErrorCodes;
   message: string;
   type: ErrorType;
-  data?: any;
+  data?: T;
   stack: string;
 }
 ```
@@ -64,15 +64,18 @@ enum ErrorCodes {
 }
 ```
 
-## Error handling
+## Error handling:
 
-### Internal errors
+## Internal errors
 
 We will start with the internal errors, since they are the easiest to handle.
 We should capture errors consciously as we develop our application and use the
 structured error object to pass the information along the application.
 
 ```typescript
+// In this example we can se how we handle possible errors consciously
+// and classifying it as internal
+
 class SomeDomainObject {
   name: string
   items?: Array<{ value: string, label: string }>
@@ -138,7 +141,7 @@ so way we can guarantee that errors bubble up to be caught by the framework erro
 Finally, we should make sure that errors with no type are **automatically catalogued as internal errors** when implementing
 the frameworks error handler or our custom centralized implementation.
 
-### External errors
+## External errors
 
 This type of errors are more difficult to handle because they come from sources
 that we might not know, partially ignore or that are not correctly documented. So the main
@@ -146,3 +149,134 @@ idea is to try to capture every possible known errors and transform them to our 
 object. For those that fall outside our knowledge a generic error should be created to display
 a friendly message to the user and log all details to our error monitoring system to track what it's
 really happening in those specific scenarios.
+
+### Network errors
+
+Network errors fall under the category of external errors and are the more common ones.
+Usually this errors are omitted, and they are partially caught by the language while
+they bubble up and break some ui implementation.
+
+On an ideal scenario, this errors should be consciously caught and mapped to our
+object error. This way, if we have already done a good job on handling our internal
+errors and if we map our external errors to an internal code, the UI would be able
+to handle gracefully the error and avoid unwanted behaviours and show a user-friendly
+message.
+
+There are several ways of capturing these errors, but in this proposal the interceptor
+approach it's the one that we will be using. We will be using axios JavaScript package
+and its interceptor implementation for demostration purpose.
+
+First we could create a transformer object to encapsulate all the transforming
+logic from the `AxiosError` object to our `AppError` object.
+
+```typescript
+class AxiosErrorTransformer {
+  networkError: AxiosError;
+  
+  constructor (networkError: AxiosError) {
+    this.networkError = networkError
+  }
+  
+  transform() {
+    switch (this.networkError.response.status) {
+      case 403:
+        return this.baseError(ErrorCodes.FORBIDDEN);
+      case 401:
+        return this.baseError(ErrorCodes.UNAUTHORIZED);
+      default:
+        return this.baseError()
+    }
+  }
+  
+  private baseError(code: ErrorCodes = ErrorCodes.GENERAL_ERROR) {
+    return new AppError({
+      code: code,
+      message: this.networkError.message,
+      type: 'external',
+      stack: this.networkError.stack
+    })
+  }
+}
+```
+
+Then just we need to create or transformer inside the interceptor and return
+our transformed object:
+
+```typescript
+axios.interceptors.response.use(function (response) {
+  return response;
+}, function (error) {
+  const _error = new AxiosErrorTransformer(error).transform();
+  return Promise.reject(error);
+});
+```
+
+This is a simple implementation and does not take into consideration that network
+errors can have their own specification and that they should be handled and adapted
+to the frontend domain. This extra information can be stored in the `data` property
+for further usage.
+
+An example could be:
+
+```typescript
+// Server error sends the following structure when a body property it's wrong
+// {
+//   property: "foo",
+//   wrong_value: 1,
+//   correct_value: "1",
+//   error: "WRONG_FORMAT"
+// }
+// So our transformer could have the following method to handle it...
+
+enum DataErrorCodes {
+  WRONG_FORMAT
+}
+
+enum WrongFormatCodes {
+  SHOULD_BE_STRING,
+  SHOULD_BE_NUMBER
+}
+
+class AxiosErrorTransformer {
+  // ...
+
+  private tranformServerError () {
+    const serverError = this.networkError.response.data
+
+    if (serverError.error === "WRONG_FORMAT") {
+      return {
+        code: DataErrorCodes.WRONG_FORMAT,
+        type: typeof serverError.correct_value === "string" ? WrongFormatCodes.SHOULD_BE_STRING : WrongFormatCodes.SHOULD_BE_NUMBER
+      }
+    }
+  }
+
+  private baseError (code: ErrorCodes = ErrorCodes.GENERAL_ERROR) {
+    return new AppError({
+      code: code,
+      message: this.networkError.message,
+      type: 'external',
+      stack: this.networkError.stack,
+      data: this.tranformServerError()
+    })
+  }
+}
+```
+
+This is just simple and cumbersome example to emphasize that this could be as simple
+or as complex as we want but will always depend on the backend error specifications.
+
+## Final thoughts
+
+The main purpose of this proposal it's to create a basic implementation that
+does not let any type of error unhandled and that in some manner will always 
+inform the user in a nice way that an error has occurred without breaking the 
+experience nor blocking the UI.
+
+The key points are:
+- differentiate between type of errors (internal and external)
+- handle **all errors**, and use ui framework implementations to avoid errors
+not being captured or use a custom implementation for a more granular handling.
+- create a app error object. We should never work with objects that we do not
+have control of nor use the basic ones from the language, we should instead
+extend them.
