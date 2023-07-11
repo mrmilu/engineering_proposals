@@ -131,7 +131,7 @@ async function tryAction<T>({ action, rethrowError }: TryActionInput<T>) {
 ```
 
 Also, we could benefit from UI frameworks implementations to capture and display these errors
-but this methods will help us better to handle **uncontrolled errors**. With these implementations 
+but these methods will help us better to handle **uncontrolled errors**. With these implementations 
 we can handle errors globally or per section: in React it will be the `ErrorBoundary` component and in Flutter
 it will be the `ErrorWidgetBuilder`, `Flutter.onError` and `PlatformDispatcher.instance.onError`.
 
@@ -153,10 +153,10 @@ really happening in those specific scenarios.
 ### Network errors
 
 Network errors fall under the category of external errors and are the more common ones.
-Usually this errors are omitted, and they are partially caught by the language while
+Usually these errors are omitted, and they are partially caught by the language while
 they bubble up and break some ui implementation.
 
-On an ideal scenario, this errors should be consciously caught and mapped to our
+On an ideal scenario, these errors should be consciously caught and mapped to our
 object error. This way, if we have already done a good job on handling our internal
 errors and if we map our external errors to an internal code, the UI would be able
 to handle gracefully the error and avoid unwanted behaviours and show a user-friendly
